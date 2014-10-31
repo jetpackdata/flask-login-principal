@@ -1,0 +1,41 @@
+{% extends 'auth/base.html' %}
+
+{% block page_content %}
+
+<ul class="nav nav-pills" role="tablist">
+  <li><a href="{{ url_for('auth.index') }}">Home</a></li>
+  <li><a href="{{ url_for('auth.admin') }}">Admin</a></li>
+  <li><a href="{{ url_for('auth.editor') }}">Edit</a></li>
+  <li><a href="{{ url_for('auth.about') }}">About</a></li>
+  {% if current_user.is_authenticated() %}
+      <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+  {% else %}
+      <li class="active"><a href="{{ url_for('auth.login') }}">Login</a></li>
+  {% endif %}
+
+</ul>
+
+<h3>
+  You can login with any of the username::password combos
+</h3>
+<p>
+  <ul>
+    <li>john :: pass1</li>
+    <li>mary :: pass2</li>
+    <li>peter :: pass3</li>
+  </ul>
+</p>
+
+<form action="login/check" method="post" role="form">
+  <div class="form-group">
+    <label for="username">Username</label>
+    <input type="text" class="form-control" id="username" name="username">
+  </div>
+  <div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" class="form-control" id="password" name="password">
+  </div>
+  <button type="submit" class="btn btn-default">Submit</button>
+</form>
+
+{% endblock %}

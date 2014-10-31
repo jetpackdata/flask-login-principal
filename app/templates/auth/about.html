@@ -1,0 +1,21 @@
+{% extends "auth/base.html" %}
+{% block page_content %}
+
+<ul class="nav nav-pills" role="tablist">
+  <li><a href="{{ url_for('auth.index') }}">Home</a></li>
+  <li><a href="{{ url_for('auth.admin') }}">Admin</a></li>
+  <li><a href="{{ url_for('auth.editor') }}">Edit</a></li>
+  <li class="active"><a href="{{ url_for('auth.about') }}">About</a></li>
+  {% if current_user.is_authenticated() %}
+      <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+  {% else %}
+      <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+  {% endif %}
+
+</ul>
+
+  <h2>About us</h2>
+
+  <h3> You dont need any permissions to access this page</h3>
+
+{% endblock %}

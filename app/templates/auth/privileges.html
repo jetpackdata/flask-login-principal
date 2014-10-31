@@ -1,0 +1,29 @@
+{% extends "auth/base.html" %}
+{% block page_content %}
+
+<ul class="nav nav-pills" role="tablist">
+  <li><a href="{{ url_for('auth.index') }}">Home</a></li>
+  <li><a href="{{ url_for('auth.admin') }}">Admin</a></li>
+  <li><a href="{{ url_for('auth.editor') }}">Edit</a></li>
+  <li><a href="{{ url_for('auth.about') }}">About</a></li>
+  {% if current_user.is_authenticated() %}
+      <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+  {% else %}
+      <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+  {% endif %}
+
+</ul>
+
+
+  {% if g.identity.name == 'anon' %}
+    <h2>You must log in to access this page</h2>
+  {% else %}
+    <h2>Your current privileges</h2>
+  {% endif %}
+
+  <ul>
+    {% for p in priv %}
+      <li>{{ p }}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
