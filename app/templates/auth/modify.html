@@ -3,7 +3,7 @@
 
 <ul class="nav nav-pills" role="tablist">
   <li><a href="{{ url_for('auth.index') }}">Home</a></li>
-  <li><a href="{{ url_for('auth.admin') }}">Admin</a></li>
+  <li class="active"><a href="{{ url_for('auth.admin') }}">Admin</a></li>
   <li><a href="{{ url_for('auth.editor') }}">Edit</a></li>
   <li><a href="{{ url_for('auth.about') }}">About</a></li>
   {% if current_user.is_authenticated() %}
@@ -14,18 +14,8 @@
 
 </ul>
 
+  <h2>Modify</h2>
 
-  {% if g.identity.name == 'anon' %}
-    <h2>You must log in to access this page</h2>
-  {% else %}
-    <h2>Your current privileges</h2>
-  {% endif %}
+  <p>{{permission}}</p>
 
-  <h3>{{identity}}</h3>
-
-  <ul>
-    {% for p in priv %}
-      <li>{{ p }}</li>
-    {% endfor %}
-  </ul>
 {% endblock %}

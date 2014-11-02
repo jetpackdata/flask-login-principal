@@ -15,6 +15,13 @@
 
 </ul>
 
+{{ identity }}
+<h3>
+  {% for post in current_user.posts %}
+    {{post}}
+  {% endfor %}
+</h3>
+
 <h2> You dont need any permissions to access this page</h2>
 
 {% if current_user.is_authenticated() %}

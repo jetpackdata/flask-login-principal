@@ -1,8 +1,10 @@
-from flask import g, Flask, flash, redirect, url_for, request, get_flashed_messages, current_app, session, render_template
+from flask import g, Flask, abort, flash, redirect, url_for, request, get_flashed_messages, current_app, session, render_template
 from flask.ext.login import LoginManager, UserMixin, current_user, login_user, logout_user, login_required
 from . import mod_auth
 from .. import login_manager
 from flask.ext.principal import Principal, Identity, Permission, AnonymousIdentity, identity_changed, identity_loaded, RoleNeed, UserNeed, ActionNeed
+from collections import namedtuple
+from functools import partial
 
 @login_manager.user_loader
 def load_user(id):
@@ -10,7 +12,7 @@ def load_user(id):
 
 @login_manager.unauthorized_handler
 def unauthorized_callback():
-    flash('Login first son')
+    flash('Login first')
     return redirect(url_for('.login'))
 
 class UserNotFoundError(Exception):
@@ -31,6 +33,15 @@ admin.description = "Admin's permissions"
 
 apps_needs = [be_admin, be_editor, to_sign_in]
 apps_permissions = [user, editor, admin]
+
+#Permissions for more granular access control
+modifyPost = namedtuple('posts', ['method', 'value'])
+modifyPostNeed = partial(modifyPost, 'modifyPost')
+
+class ModifyPostPermission(Permission):
+    def __init__(self, post_id):
+        need = modifyPostNeed(unicode(post_id))
+        super(ModifyPostPermission, self).__init__(need)
 
 def current_privileges():
     return (('{method} : {value}').format(method=n.method, value=n.value)
@@ -54,6 +65,12 @@ class User(UserMixin):
         'peter': 'editor'
     }
 
+    POSTS = {
+        'john':[1,3,4],
+        'mary':[2,5],
+        'peter':[6]
+    }
+
 
 
     def __init__(self, id):
@@ -62,6 +79,7 @@ class User(UserMixin):
         self.id = id
         self.password = self.USERS[id]
         self.roles=self.ROLES[id]
+        self.posts=self.POSTS[id]
 
 
     @classmethod
@@ -121,6 +139,12 @@ def editor():
 def about():
     return render_template('auth/about.html')
 
+@mod_auth.route('/modify/<post_id>')
+def modify(post_id):
+    permission = ModifyPostPermission(unicode(post_id))
+    if permission.can():
+        return render_template('auth/modify.html')
+    abort(403)
 
 
 @mod_auth.errorhandler(401)
@@ -134,7 +158,7 @@ def authorisation_failed(e):
     flash(('Your current identity is {id}. You need special privileges to'
            ' access this page').format(id=g.identity.id))
 
-    return render_template('auth/privileges.html', priv=current_privileges())
+    return render_template('auth/privileges.html', priv=current_privileges(),identity=g.identity.provides)
 
 @identity_loaded.connect
 def on_identity_loaded(sender, identity):
@@ -148,6 +172,10 @@ def on_identity_loaded(sender, identity):
 
     if identity.id == 'admin':
         needs.append(be_admin)
+
+    if hasattr(current_user, 'posts'):
+        for post in current_user.posts:
+            needs.append(modifyPostNeed(unicode(post)))
 
 
     for n in needs:
